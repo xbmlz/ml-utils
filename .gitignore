@@ -1,0 +1,6 @@
+# Hidden files
+.DS_store
+__pycache__/
+poetry.lock
+.pytest_cache
+.venv
