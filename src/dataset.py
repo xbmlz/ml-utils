@@ -3,7 +3,7 @@ from imblearn.combine import SMOTEENN
 from imblearn.over_sampling import SMOTE
 from imblearn.under_sampling import RandomUnderSampler
 from sklearn.model_selection import train_test_split
-from sklearn.utils import shuffle
+from sklearn.utils import compute_class_weight, shuffle
 
 
 def read_dataset(
