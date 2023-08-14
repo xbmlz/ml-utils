@@ -43,6 +43,19 @@ def read_dataset(
     y_train: pd.Series - train set label
     y_val: pd.Series - validation set label
     y_test: pd.Series - test set label
+
+    Examples
+    --------
+    >>> from ml_utils.dataset import read_dataset
+    >>> df, x_train, x_val, x_test, y_train, y_val, y_test = read_dataset(
+    ...     csv_file="dataset.csv",
+    ...     label_col="label",
+    ...     is_shuffle=True,
+    ...     normalization="z_score",
+    ...     val_size=0.2,
+    ...     test_size=0.5,
+    ...     sample_type="under",
+    ... )
     """
     df = pd.read_csv(csv_file)
     # shuffle data
