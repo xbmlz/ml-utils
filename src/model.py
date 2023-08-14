@@ -80,6 +80,7 @@ def build_and_train(
     y_train: pd.Series,
     x_val: pd.DataFrame,
     y_val: pd.Series,
+    model_type: str = "classification",
     min_layers: int = 2,
     max_layers: int = 5,
     min_units: int = 32,
@@ -97,17 +98,35 @@ def build_and_train(
     callbacks: list = None,
 ):
     num_features = x_train.shape[1]
-    num_classes = len(y_train.unique())
-    if num_classes == 2:
-        loss = "binary_crossentropy"
-        output_activation = "sigmoid"
+    if model_type == "classification":
+        num_classes = len(y_train.unique())
+        if num_classes == 2:
+            loss = tf.keras.losses.BinaryCrossentropy(from_logits=False)
+            output_activation = tf.keras.activations.sigmoid
+            output_layer_units = 1
+            metrics = [
+                "accuracy",
+                tf.keras.metrics.Precision(),
+                tf.keras.metrics.Recall(),
+                Specificity(),
+                tf.keras.metrics.AUC(),
+            ]
+        else:
+            loss = tf.keras.losses.CategoricalCrossentropy(from_logits=False)
+            output_activation = tf.keras.activations.softmax
+            output_layer_units = num_classes
+            metrics = [
+                "accuracy",
+                tf.keras.metrics.Precision(),
+                tf.keras.metrics.Recall(),
+            ]
+    elif model_type == "regression":
+        loss = tf.keras.losses.MeanSquaredError()
+        output_activation = tf.keras.activations.linear
         output_layer_units = 1
-    else:
-        loss = "categorical_crossentropy"
-        output_activation = "softmax"
-        output_layer_units = num_classes
+        metrics = ["mae", "mse"]
 
-    if class_weight is None:
+    if class_weight is None and model_type == "classification":
         class_weight = compute_class_weight(
             class_weight="balanced", classes=np.unique(y_train), y=y_train
         )
@@ -136,13 +155,7 @@ def build_and_train(
                 hp.Float("learning_rate", min_lr, max_lr, sampling="log")
             ),
             loss=loss,
-            metrics=[
-                "accuracy",
-                tf.keras.metrics.Precision(),
-                tf.keras.metrics.Recall(),
-                Specificity(),
-                tf.keras.metrics.AUC(),
-            ],
+            metrics=metrics,
         )
         return model
 
